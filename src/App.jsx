@@ -1,15 +1,15 @@
 
 import { useState, useCallback } from 'react';
-import Sidebar from './components/Sidebar';
+import Sidebar, { MOODS } from './components/Sidebar';
 import SongList from './components/SongList';
 import PlayerBar from './components/PlayerBar';
 import { useSongs } from './hooks/useSongs';
 
 export default function App() {
-  const [selectedMood,  setSelectedMood]  = useState(null);
-  const [currentSong,   setCurrentSong]   = useState(null);
-  const [currentIndex,  setCurrentIndex]  = useState(-1);
-  const [history,       setHistory]       = useState([]);
+  const [selectedMood, setSelectedMood] = useState(null);
+  const [currentSong,  setCurrentSong]  = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [history,      setHistory]      = useState([]);
 
   const {
     songs: rawSongs, loading, loadingMore,
@@ -38,90 +38,145 @@ export default function App() {
   }, [songs]);
 
   const handleNext = useCallback(() => {
-    const nextIdx = currentIndex + 1;
-    if (songs[nextIdx]) {
-      setCurrentSong(songs[nextIdx]);
-      setCurrentIndex(nextIdx);
-      if (nextIdx >= songs.length - 3 && hasMore) fetchMore();
+    const next = songs[currentIndex + 1];
+    if (next) {
+      setCurrentSong(next);
+      setCurrentIndex(i => i + 1);
+      if (currentIndex + 1 >= songs.length - 2 && hasMore) fetchMore();
     }
   }, [songs, currentIndex, hasMore, fetchMore]);
 
   const handlePrev = useCallback(() => {
-    const prevIdx = currentIndex - 1;
-    if (songs[prevIdx]) { setCurrentSong(songs[prevIdx]); setCurrentIndex(prevIdx); }
+    const prev = songs[currentIndex - 1];
+    if (prev) { setCurrentSong(prev); setCurrentIndex(i => i - 1); }
   }, [songs, currentIndex]);
 
-  const moodColor = selectedMood?.color || 'transparent';
+  const moodColor = selectedMood?.color || 'var(--accent)';
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden', background:'var(--bg-base)' }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden', background:'var(--bg)' }}>
       <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
 
         <Sidebar selectedMood={selectedMood} onMoodSelect={handleMoodSelect} history={history} />
 
         <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
-          {/* Header */}
+          
           <div style={{
-            padding:'32px 32px 20px', flexShrink:0,
-            background: selectedMood ? `linear-gradient(180deg, ${moodColor}20 0%, transparent 100%)` : 'transparent',
-            transition:'background 0.6s ease',
+            padding:'28px 32px 20px', flexShrink:0,
+            background: selectedMood
+              ? `linear-gradient(160deg, ${selectedMood.color}14 0%, transparent 60%)`
+              : 'transparent',
+            transition:'background 0.8s ease',
+            borderBottom:'1px solid var(--border)',
           }}>
             {selectedMood ? (
               <div className="fade-up" key={selectedMood.id}>
-                <div style={{ fontSize:11, fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:moodColor, marginBottom:6 }}>
-                  Mood Playlist
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10 }}>
+                  <div style={{
+                    fontSize:9, fontWeight:700, letterSpacing:'0.14em',
+                    textTransform:'uppercase', color: moodColor,
+                    padding:'3px 8px', borderRadius:4,
+                    background:`${moodColor}18`,
+                    border:`1px solid ${moodColor}30`,
+                  }}>
+                    Mood Playlist
+                  </div>
                 </div>
-                <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-                  <span style={{ fontSize:40 }}>{selectedMood.emoji}</span>
+                <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+                  <span style={{ fontSize:44, lineHeight:1 }}>{selectedMood.emoji}</span>
                   <div>
-                    <h2 style={{ fontFamily:'Syne, sans-serif', fontWeight:700, fontSize:32, color:'var(--text-primary)', letterSpacing:'-0.5px' }}>
+                    <h2 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:34, color:'var(--text-1)', letterSpacing:'-1px', lineHeight:1 }}>
                       {selectedMood.label}
                     </h2>
-                    <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>
-                      {loading ? 'AI is curating your playlist...' : `${totalSongs} songs · Groq AI · YouTube · All languages`}
+                    <p style={{ fontSize:12, color:'var(--text-4)', marginTop:6, letterSpacing:'0.02em' }}>
+                      {loading
+                        ? 'Groq AI is curating your playlist...'
+                        : `${totalSongs} songs · All languages · Groq AI + YouTube`
+                      }
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="fade-up">
-                <h2 style={{ fontFamily:'Syne, sans-serif', fontWeight:700, fontSize:32, color:'var(--text-primary)' }}>Good evening 👋</h2>
-                <p style={{ fontSize:14, color:'var(--text-muted)', marginTop:6 }}>How are you feeling today?</p>
+                <h2 style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:34, color:'var(--text-1)', letterSpacing:'-1px' }}>
+                  Good evening 👋
+                </h2>
+                <p style={{ fontSize:13, color:'var(--text-4)', marginTop:8 }}>
+                  How are you feeling today?
+                </p>
+                
+                <div style={{ display:'flex', gap:8, marginTop:16, flexWrap:'wrap' }}>
+                  {MOODS.map(mood => (
+                    <button key={mood.id} onClick={() => handleMoodSelect(mood)}
+                      style={{
+                        display:'flex', alignItems:'center', gap:6,
+                        padding:'6px 12px', borderRadius:100,
+                        background:'var(--bg-3)', border:'1px solid var(--border)',
+                        color:'var(--text-3)', fontSize:12, fontWeight:500,
+                        cursor:'pointer', transition:'all 0.15s',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = mood.bg;
+                        e.currentTarget.style.color = mood.color;
+                        e.currentTarget.style.borderColor = `${mood.color}40`;
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'var(--bg-3)';
+                        e.currentTarget.style.color = 'var(--text-3)';
+                        e.currentTarget.style.borderColor = 'var(--border)';
+                      }}
+                    >
+                      <span style={{ fontSize:13 }}>{mood.emoji}</span>
+                      {mood.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
           
           {error && (
-            <div style={{ margin:'0 32px 16px', padding:'12px 16px', background:'rgba(239,68,68,0.1)', border:'0.5px solid rgba(239,68,68,0.3)', borderRadius:8, fontSize:13, color:'#f87171', flexShrink:0 }}>
+            <div style={{
+              margin:'12px 32px 0', padding:'10px 14px', flexShrink:0,
+              background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)',
+              borderRadius:8, fontSize:12, color:'#f87171',
+            }}>
               ⚠ {error}
             </div>
           )}
 
           
-          <div style={{ flex:1, overflowY:'auto', padding:'0 16px' }}>
-            <SongList songs={songs} currentSong={currentSong} onSongSelect={handleSongSelect} loading={loading} mood={selectedMood} />
+          <div style={{ flex:1, overflowY:'auto', padding:'12px 16px 0' }}>
+            <SongList
+              songs={songs} currentSong={currentSong}
+              onSongSelect={handleSongSelect} loading={loading} mood={selectedMood}
+            />
 
+            
             {!loading && songs.length > 0 && (
-              <div style={{ padding:'16px 16px 24px', display:'flex', justifyContent:'center' }}>
+              <div style={{ padding:'20px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:12 }}>
                 {hasMore ? (
-                  <button
-                    onClick={fetchMore} disabled={loadingMore}
+                  <button onClick={fetchMore} disabled={loadingMore}
                     style={{
-                      padding:'10px 32px', borderRadius:100,
-                      border:'0.5px solid var(--border)', background:'transparent',
-                      color: loadingMore ? 'var(--text-muted)' : 'var(--text-primary)',
-                      fontSize:13, fontWeight:500, fontFamily:'DM Sans, sans-serif',
-                      cursor: loadingMore ? 'not-allowed' : 'pointer', transition:'all 0.15s',
+                      padding:'9px 28px', borderRadius:100,
+                      border:'1px solid var(--border-2)',
+                      background: loadingMore ? 'var(--bg-3)' : 'transparent',
+                      color: loadingMore ? 'var(--text-4)' : 'var(--text-2)',
+                      fontSize:12, fontWeight:500, cursor: loadingMore ? 'not-allowed' : 'pointer',
+                      transition:'all 0.15s',
                     }}
-                    onMouseEnter={e => { if (!loadingMore) e.currentTarget.style.background='var(--bg-hover)'; }}
+                    onMouseEnter={e => { if (!loadingMore) e.currentTarget.style.background='var(--bg-3)'; }}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}
                   >
-                    {loadingMore ? 'Loading more...' : 'Load more songs'}
+                    {loadingMore ? 'Loading...' : `Load more songs`}
                   </button>
                 ) : (
-                  <p style={{ fontSize:12, color:'var(--text-muted)' }}>All {totalSongs} songs loaded</p>
+                  <p style={{ fontSize:11, color:'var(--text-4)', letterSpacing:'0.04em' }}>
+                    All {totalSongs} songs loaded
+                  </p>
                 )}
               </div>
             )}
@@ -129,8 +184,12 @@ export default function App() {
         </div>
       </div>
 
-      <PlayerBar song={currentSong} onNext={handleNext} onPrev={handlePrev}
-        hasNext={currentIndex >= 0 && currentIndex < songs.length - 1} hasPrev={currentIndex > 0} />
+      <PlayerBar
+        song={currentSong}
+        onNext={handleNext} onPrev={handlePrev}
+        hasNext={currentIndex >= 0 && currentIndex < songs.length - 1}
+        hasPrev={currentIndex > 0}
+      />
     </div>
   );
 }
