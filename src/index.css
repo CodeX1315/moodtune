@@ -1,0 +1,65 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap');
+
+:root {
+  --bg-base:     #0d0d0d;
+  --bg-elevated: #151515;
+  --bg-card:     #1c1c1c;
+  --bg-hover:    #242424;
+  --border:      #282828;
+  --text-primary:#f0ede8;
+  --text-sub:    #b3b3b3;
+  --text-muted:  #6a6a6a;
+  --accent:      #a855f7;
+  --accent-glow: rgba(168,85,247,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: inherit; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes eq1 { 0%,100% { height: 4px } 50% { height: 14px } }
+@keyframes eq2 { 0%,100% { height: 10px} 50% { height: 4px  } }
+@keyframes eq3 { 0%,100% { height: 7px } 50% { height: 12px } }
+@keyframes shimmer {
+  0%   { background-position: -400px 0 }
+  100% { background-position:  400px 0 }
+}
+
+.fade-up { animation: fadeUp 0.35s ease both; }
+
+.eq-bar { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.eq-bar span { display: block; width: 3px; border-radius: 2px; }
+.eq-bar span:nth-child(1) { animation: eq1 0.9s ease-in-out infinite; }
+.eq-bar span:nth-child(2) { animation: eq2 0.9s ease-in-out infinite 0.2s; }
+.eq-bar span:nth-child(3) { animation: eq3 0.9s ease-in-out infinite 0.4s; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
